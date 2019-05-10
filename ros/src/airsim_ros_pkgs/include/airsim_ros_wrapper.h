@@ -135,7 +135,9 @@ public:
 
     /// ROS service callbacks
     bool takeoff_srv_cb(airsim_ros_pkgs::Takeoff::Request& request, airsim_ros_pkgs::Takeoff::Response& response, const std::string& vehicle_name);
+    bool takeoff_all_srv_cb(airsim_ros_pkgs::Takeoff::Request& request, airsim_ros_pkgs::Takeoff::Response& response);
     bool land_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response, const std::string& vehicle_name);
+    bool land_all_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response);
     bool reset_srv_cb(airsim_ros_pkgs::Reset::Request& request, airsim_ros_pkgs::Reset::Response& response);
 
     /// ROS tf broadcasters
@@ -177,6 +179,8 @@ public:
 
 private:
     ros::Subscriber vel_cmd_body_frame_sub_;
+    ros::ServiceServer takeoff_all_srvr_;
+    ros::ServiceServer land_all_srvr_;
 
     struct MultiRotorROS
     {

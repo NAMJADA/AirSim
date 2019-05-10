@@ -84,12 +84,36 @@ bool AirsimROSWrapper::takeoff_srv_cb(airsim_ros_pkgs::Takeoff::Request& request
     return true;
 }
 
+bool AirsimROSWrapper::takeoff_all_srv_cb(airsim_ros_pkgs::Takeoff::Request& request, airsim_ros_pkgs::Takeoff::Response& response)
+{
+    if (request.waitOnLastTask)
+        for(const auto& vehicle_name : vehicle_names_)
+            airsim_client_.takeoffAsync(20, vehicle_name)->waitOnLastTask(); // todo value for timeout_sec? 
+        // response.success = 
+    else
+        for(const auto& vehicle_name : vehicle_names_)
+            airsim_client_.takeoffAsync(20, vehicle_name);
+        // response.success = 
+    return true;
+}
+
 bool AirsimROSWrapper::land_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response, const std::string& vehicle_name)
 {
     if (request.waitOnLastTask)
         airsim_client_.landAsync(60, vehicle_name)->waitOnLastTask();
     else
         airsim_client_.landAsync(60, vehicle_name);
+    return true; //todo
+}
+
+bool AirsimROSWrapper::land_all_srv_cb(airsim_ros_pkgs::Land::Request& request, airsim_ros_pkgs::Land::Response& response)
+{
+    if (request.waitOnLastTask)
+        for(const auto& vehicle_name : vehicle_names_)
+            airsim_client_.landAsync(60, vehicle_name)->waitOnLastTask();
+    else
+        for(const auto& vehicle_name : vehicle_names_)
+            airsim_client_.landAsync(60, vehicle_name);
     return true; //todo
 }
 
@@ -622,6 +646,13 @@ void AirsimROSWrapper::create_ros_pubs_from_settings_json()
                 }
             }
         }
+    }
+
+    // add takeoff and land all services if more than 2 drones
+    if (multirotor_ros_vec_.size() > 2)
+    {
+        takeoff_all_srvr_ = nh_private_.advertiseService("takeoff_all", &AirsimROSWrapper::takeoff_all_srv_cb, this);
+        land_all_srvr_ = nh_private_.advertiseService("land_all", &AirsimROSWrapper::land_all_srv_cb, this);
     }
 
     // todo this is not clean. make a struct per vehicle and per sensor which will store every ros pub/sub/service/topic name 
